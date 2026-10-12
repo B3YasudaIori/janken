@@ -9,6 +9,19 @@
 <body>
   <h1>じゃんけん</h1>
   <p th:if="${userName != null}" th:text="|Hi ${userName}|"></p>
+
+  <nav aria-label="じゃんけんの手">
+    <a th:href="@{/janken(hand='rock')}">グー</a>
+    <a th:href="@{/janken(hand='scissors')}">チョキ</a>
+    <a th:href="@{/janken(hand='paper')}">パー</a>
+  </nav>
+
+  <p th:if="${errorMessage != null}" th:text="${errorMessage}" role="alert"></p>
+  <div th:if="${result != null}">
+    <p th:text="|あなたの手：${playerHand}|"></p>
+    <p th:text="|相手の手：${computerHand}|"></p>
+    <p th:text="|結果：${result}|"></p>
+  </div>
 </body>
 
 </html>

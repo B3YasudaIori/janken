@@ -2,7 +2,7 @@ package oit.is.z3682.kaizi.janken.controller;
 
 import java.security.Principal;
 
-import oit.is.z3682.kaizi.janken.model.Janken;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,9 +10,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import oit.is.z3682.kaizi.janken.model.Janken;
+import oit.is.z3682.kaizi.janken.model.Entry;
+
 @RequestMapping("/sec")
 @Controller
 public class JankenController {
+
+  @Autowired
+  private Entry entry;
+
   /**
    * 認証済みのユーザ名と、じゃんけんの結果を画面に渡します。
    */
@@ -22,7 +29,11 @@ public class JankenController {
       Principal principal,
       Model model) {
     if (principal != null) {
-      model.addAttribute("userName", principal.getName());
+      String userName = principal.getName();
+
+      entry.AddUser(userName);
+      model.addAttribute("userName", userName);
+      model.addAttribute("entry", entry);
     }
 
     if (hand != null) {

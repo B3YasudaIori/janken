@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.springframework.org/schema/security">
+
+<head>
+  <meta charset="utf-8">
+  <title>試合</title>
+</head>
+
+<body>
+  <h1>Match</h1>
+
+  <h2>[[${userName}]] V.S. [[${opponent.userName}]]</h2>
+
+  <a th:href="@{/sec/janken}">もどる</a>
+</body>

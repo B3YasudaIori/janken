@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import oit.is.z3682.kaizi.janken.model.*;
 
-@RequestMapping("/sec")
 @Controller
 public class JankenController {
 
@@ -26,7 +25,7 @@ public class JankenController {
   /**
    * 認証済みのユーザ名と、じゃんけんの結果を画面に渡します。
    */
-  @GetMapping("/janken")
+  @GetMapping("/sec/janken")
   public String ShowJanken(
       @RequestParam(name = "hand", required = false) String hand,
       Principal principal,
@@ -60,7 +59,7 @@ public class JankenController {
    * 参加フォームから受け取ったユーザ名を画面に渡します。
    *
    */
-  @PostMapping("/janken")
+  @PostMapping("/sec/janken")
   public String JoinJanken(
       @RequestParam(name = "userName", required = false) String userName,
       Principal principal,
@@ -77,5 +76,22 @@ public class JankenController {
     model.addAttribute("matches", matches);
 
     return "janken.html";
+  }
+
+  /**
+   * IDで対戦相手を検索し、ログインユーザ名とともに画面へ渡す
+   */
+  @GetMapping("/sec/match")
+  public String ShowMatch(
+      @RequestParam("id") int id,
+      Principal principal,
+      Model model) {
+    User opponent = userMapper.selectById(id);
+    if (opponent != null) {
+      String userName = principal.getName();
+      model.addAttribute("userName", userName);
+      model.addAttribute("opponent", opponent);
+    }
+    return "match.html";
   }
 }

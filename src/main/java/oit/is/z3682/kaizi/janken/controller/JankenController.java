@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import oit.is.z3682.kaizi.janken.model.Janken;
-import oit.is.z3682.kaizi.janken.model.UserMapper;
 import oit.is.z3682.kaizi.janken.model.*;
 
 @RequestMapping("/sec")
@@ -21,6 +19,9 @@ public class JankenController {
 
   @Autowired
   private UserMapper userMapper;
+
+  @Autowired
+  private MatchMapper matchMapper;
 
   /**
    * 認証済みのユーザ名と、じゃんけんの結果を画面に渡します。
@@ -37,6 +38,9 @@ public class JankenController {
 
     ArrayList<User> users = userMapper.selectAllUsers();
     model.addAttribute("users", users);
+
+    ArrayList<Match> matches = matchMapper.selectAllMatches();
+    model.addAttribute("matches", matches);
 
     if (hand != null) {
       try {
@@ -68,6 +72,10 @@ public class JankenController {
 
     ArrayList<User> users = userMapper.selectAllUsers();
     model.addAttribute("users", users);
+
+    ArrayList<Match> matches = matchMapper.selectAllMatches();
+    model.addAttribute("matches", matches);
+
     return "janken.html";
   }
 }

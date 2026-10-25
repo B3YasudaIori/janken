@@ -11,5 +11,17 @@
 
   <h2>[[${userName}]] V.S. [[${opponent.userName}]]</h2>
 
+  <div th:if="${opponent.userName == 'CPU'}">
+    <a th:href="@{/sec/fight(id=${opponent.id}, hand='rock')}">ぐー</a>
+    <a th:href="@{/sec/fight(id=${opponent.id}, hand='scissors')}">ちょき</a>
+    <a th:href="@{/sec/fight(id=${opponent.id}, hand='paper')}">ぱー</a>
+  </div>
+
+  <div th:if="${result != null}">
+    <div>あなたの手 [[${playerHand}]]</div>
+    <div>相手の手 [[${opponentHand}]]</div>
+    <div>結果 [[${result}]]</div>
+  </div>
+
   <a th:href="@{/sec/janken}">もどる</a>
 </body>

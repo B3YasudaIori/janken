@@ -11,9 +11,9 @@
   <p th:if="${userName != null}" th:text="|Hi ${userName}|"></p>
 
   <nav aria-label="じゃんけんの手">
-    <a th:href="@{/janken(hand='rock')}">グー</a>
-    <a th:href="@{/janken(hand='scissors')}">チョキ</a>
-    <a th:href="@{/janken(hand='paper')}">パー</a>
+    <a th:href="@{/sec/janken(hand='rock')}">グー</a>
+    <a th:href="@{/sec/janken(hand='scissors')}">チョキ</a>
+    <a th:href="@{/sec/janken(hand='paper')}">パー</a>
   </nav>
 
   <p th:if="${errorMessage != null}" th:text="${errorMessage}" role="alert"></p>

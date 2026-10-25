@@ -1,21 +1,30 @@
 package oit.is.z3682.kaizi.janken.controller;
 
+import java.security.Principal;
+
 import oit.is.z3682.kaizi.janken.model.Janken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+@RequestMapping("/sec")
 @Controller
 public class JankenController {
   /**
-   * 画面を表示し、手が指定された場合はCPUとの対戦結果を渡します。
+   * 認証済みのユーザ名と、じゃんけんの結果を画面に渡します。
    */
   @GetMapping("/janken")
   public String ShowJanken(
       @RequestParam(name = "hand", required = false) String hand,
+      Principal principal,
       Model model) {
+    if (principal != null) {
+      model.addAttribute("userName", principal.getName());
+    }
+
     if (hand != null) {
       try {
         Janken janken = new Janken(hand);
@@ -27,21 +36,23 @@ public class JankenController {
       }
     }
 
-    return "janken";
+    return "janken.html";
   }
 
   /**
    * 参加フォームから受け取ったユーザ名を画面に渡します。
+   *
    */
   @PostMapping("/janken")
   public String JoinJanken(
       @RequestParam(name = "userName", required = false) String userName,
+      Principal principal,
       Model model) {
     if (userName == null || userName.isBlank()) {
       return "redirect:/";
     }
 
-    model.addAttribute("userName", userName);
-    return "janken";
+    model.addAttribute("userName", principal.getName());
+    return "janken.html";
   }
 }

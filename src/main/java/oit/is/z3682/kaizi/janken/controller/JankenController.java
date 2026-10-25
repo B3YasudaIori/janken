@@ -1,6 +1,7 @@
 package oit.is.z3682.kaizi.janken.controller;
 
 import java.security.Principal;
+import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -11,14 +12,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import oit.is.z3682.kaizi.janken.model.Janken;
-import oit.is.z3682.kaizi.janken.model.Entry;
+import oit.is.z3682.kaizi.janken.model.UserMapper;
+import oit.is.z3682.kaizi.janken.model.*;
 
 @RequestMapping("/sec")
 @Controller
 public class JankenController {
 
   @Autowired
-  private Entry entry;
+  private UserMapper userMapper;
 
   /**
    * 認証済みのユーザ名と、じゃんけんの結果を画面に渡します。
@@ -30,11 +32,11 @@ public class JankenController {
       Model model) {
     if (principal != null) {
       String userName = principal.getName();
-
-      entry.AddUser(userName);
       model.addAttribute("userName", userName);
-      model.addAttribute("entry", entry);
     }
+
+    ArrayList<User> users = userMapper.selectAllUsers();
+    model.addAttribute("users", users);
 
     if (hand != null) {
       try {
@@ -59,11 +61,13 @@ public class JankenController {
       @RequestParam(name = "userName", required = false) String userName,
       Principal principal,
       Model model) {
-    if (userName == null || userName.isBlank()) {
-      return "redirect:/";
+    if (principal != null) {
+      String name = principal.getName();
+      model.addAttribute("userName", name);
     }
 
-    model.addAttribute("userName", principal.getName());
+    ArrayList<User> users = userMapper.selectAllUsers();
+    model.addAttribute("users", users);
     return "janken.html";
   }
 }

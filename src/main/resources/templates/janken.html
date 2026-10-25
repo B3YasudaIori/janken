@@ -29,6 +29,17 @@
     <p th:text="|結果：${result}|"></p>
   </div>
 
+  <h2>試合結果</h2>
+  <div th:each="match : ${matches}">
+    <p>
+      ID: [[${match.id}]]
+      user1：[[${match.user1}]]
+      user2：[[${match.user2}]]
+      user1の手：[[${match.user1Hand}]]
+      user2の手：[[${match.user2Hand}]]
+    </p>
+  </div>
+
   <div> <a href="/logout">ログアウト</a></div>
 </body>
 

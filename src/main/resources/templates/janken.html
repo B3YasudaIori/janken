@@ -1,14 +1,20 @@
 <!DOCTYPE html>
-<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.springframework.org/schema/security">
 
 <head>
   <meta charset="utf-8">
-  <title>SpringBoot Samples</title>
+  <title>Janken</title>
 </head>
 
 <body>
   <h1>じゃんけん</h1>
   <p th:if="${userName != null}" th:text="|Hi ${userName}|"></p>
+
+  <h2>エントリー</h2>
+
+  <ul>
+    <li th:each="user : ${entry.users}">[[${user}]]</li>
+  </ul>
 
   <nav aria-label="じゃんけんの手">
     <a th:href="@{/sec/janken(hand='rock')}">グー</a>
@@ -22,6 +28,8 @@
     <p th:text="|相手の手：${computerHand}|"></p>
     <p th:text="|結果：${result}|"></p>
   </div>
+
+  <div> <a href="/logout">ログアウト</a></div>
 </body>
 
 </html>

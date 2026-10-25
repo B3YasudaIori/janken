@@ -7,27 +7,20 @@
 </head>
 
 <body>
-  <h1>じゃんけん</h1>
+  <div> <a href="/logout">ログアウト</a></div>
+
+  <h1>Janken Game!</h1>
   <p th:if="${userName != null}" th:text="|Hi ${userName}|"></p>
 
   <h2>エントリー</h2>
 
   <ul>
-    <li th:each="user : ${users}">[[${user.userName}]]</li>
+    <li th:each="user : ${users}">
+      <a th:href="@{/sec/match(id=${user.id})}">
+        [[${user.userName}]]
+      </a>
+    </li>
   </ul>
-
-  <nav aria-label="じゃんけんの手">
-    <a th:href="@{/sec/janken(hand='rock')}">グー</a>
-    <a th:href="@{/sec/janken(hand='scissors')}">チョキ</a>
-    <a th:href="@{/sec/janken(hand='paper')}">パー</a>
-  </nav>
-
-  <p th:if="${errorMessage != null}" th:text="${errorMessage}" role="alert"></p>
-  <div th:if="${result != null}">
-    <p th:text="|あなたの手：${playerHand}|"></p>
-    <p th:text="|相手の手：${computerHand}|"></p>
-    <p th:text="|結果：${result}|"></p>
-  </div>
 
   <h2>試合結果</h2>
   <div th:each="match : ${matches}">
@@ -39,8 +32,6 @@
       user2の手：[[${match.user2Hand}]]
     </p>
   </div>
-
-  <div> <a href="/logout">ログアウト</a></div>
 </body>
 
 </html>

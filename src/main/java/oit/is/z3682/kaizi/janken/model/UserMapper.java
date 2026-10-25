@@ -11,4 +11,7 @@ import org.apache.ibatis.annotations.Select;
 public interface UserMapper {
   @Select("select id, username from users")
   ArrayList<User> selectAllUsers();
+
+  @Select("select id, username from users where id = #{id}")
+  User selectById(int id);
 }

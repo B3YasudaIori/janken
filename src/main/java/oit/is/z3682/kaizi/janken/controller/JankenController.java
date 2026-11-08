@@ -1,5 +1,6 @@
 package oit.is.z3682.kaizi.janken.controller;
 
+import java.lang.reflect.Array;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Random;
@@ -8,8 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +22,9 @@ public class JankenController {
 
   @Autowired
   private MatchMapper matchMapper;
+
+  @Autowired
+  private MatchInfoMapper matchInfoMapper;
 
   /**
    * 認証済みのユーザ名と、じゃんけんの結果を画面に渡します。
@@ -42,6 +44,9 @@ public class JankenController {
 
     ArrayList<Match> matches = matchMapper.selectAllMatches();
     model.addAttribute("matches", matches);
+
+    ArrayList<MatchInfo> activeMatchInfos = matchInfoMapper.selectActiveMatchInfos();
+    model.addAttribute("matchInfos", activeMatchInfos);
 
     return "janken.html";
   }
@@ -64,6 +69,35 @@ public class JankenController {
     }
 
     return "match.html";
+  }
+
+  /**
+   * 選択した手を保存し、対戦相手の手を待つ。
+   */
+  @GetMapping("/sec/wait")
+  @Transactional
+  public String Wait(
+      @RequestParam("id") int id,
+      @RequestParam("hand") String hand,
+      Principal principal,
+      Model model) {
+    User player = userMapper.selectByName(principal.getName());
+    User opponent = userMapper.selectById(id);
+
+    String playerHand = "";
+    switch (hand) {
+      case "rock" -> playerHand = "Gu";
+      case "scissors" -> playerHand = "Choki";
+      case "paper" -> playerHand = "Pa";
+    }
+    MatchInfo matchInfo = new MatchInfo();
+    matchInfo.setUser1(player.getId());
+    matchInfo.setUser2(opponent.getId());
+    matchInfo.setUser1Hand(playerHand);
+    matchInfo.setIsActive(true);
+    matchInfoMapper.insertMatchInfo(matchInfo);
+    model.addAttribute("userName", principal.getName());
+    return "wait.html";
   }
 
   /**

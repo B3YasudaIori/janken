@@ -1,6 +1,5 @@
 package oit.is.z3682.kaizi.janken.model;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 import org.apache.ibatis.annotations.Mapper;

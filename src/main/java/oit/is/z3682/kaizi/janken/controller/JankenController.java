@@ -90,12 +90,25 @@ public class JankenController {
       case "scissors" -> playerHand = "Choki";
       case "paper" -> playerHand = "Pa";
     }
-    MatchInfo matchInfo = new MatchInfo();
-    matchInfo.setUser1(player.getId());
-    matchInfo.setUser2(opponent.getId());
-    matchInfo.setUser1Hand(playerHand);
-    matchInfo.setIsActive(true);
-    matchInfoMapper.insertMatchInfo(matchInfo);
+
+    MatchInfo waiting = matchInfoMapper.selectWaitingMatchInfo(opponent.getId(), player.getId());
+    if (waiting == null) {
+      MatchInfo matchInfo = new MatchInfo();
+      matchInfo.setUser1(player.getId());
+      matchInfo.setUser2(opponent.getId());
+      matchInfo.setUser1Hand(playerHand);
+      matchInfo.setIsActive(true);
+      matchInfoMapper.insertMatchInfo(matchInfo);
+    } else {
+      Match match = new Match();
+      match.setUser1(waiting.getUser1());
+      match.setUser2(waiting.getUser2());
+      match.setUser1Hand(waiting.getUser1Hand());
+      match.setUser2Hand(playerHand);
+      match.setIsActive(true);
+      matchMapper.insertMatch(match);
+      matchInfoMapper.finishMatchInfo(waiting.getId());
+    }
     model.addAttribute("userName", principal.getName());
     return "wait.html";
   }

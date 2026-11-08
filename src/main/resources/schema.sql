@@ -8,5 +8,14 @@ create table matches(
     user1 int not null,
     user2 int not null,
     user1Hand varchar not null,
-    user2Hand varchar not null
-)
+    user2Hand varchar not null,
+    isActive boolean
+);
+
+create table matchinfo(
+  id identity,
+  user1 int not null,
+  user2 int not null,
+  user1Hand varchar not null,
+  isActive boolean
+);

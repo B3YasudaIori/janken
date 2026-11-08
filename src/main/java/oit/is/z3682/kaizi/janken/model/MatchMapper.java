@@ -9,7 +9,7 @@ import org.apache.ibatis.annotations.Select;
 
 @Mapper
 public interface MatchMapper {
-  @Select("select id, user1, user2, user1Hand, user2Hand from matches")
+  @Select("select id, user1, user2, user1Hand, user2Hand, isActive from matches")
   ArrayList<Match> selectAllMatches();
 
   @Insert("insert into matches(user1, user2, user1Hand, user2Hand) values (#{user1}, #{user2}, #{user1Hand}, #{user2Hand})")

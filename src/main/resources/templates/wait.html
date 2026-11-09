@@ -8,7 +8,55 @@
 
 <body>
   <h1>相手の手を待ってます</h1>
+
   <p th:text="|Hi ${userName}|"></p>
+
+  <div id="result" hidden>
+    <h2>結果</h2>
+    <div id="match"></div>
+    <a th:href="@{/sec/janken}">もどる</a>
+  </div>
+
+  <script th:inline="javascript">
+    const playerId = /*[[${playerId}]]*/ 0;
+    const eventsUrl = /*[[@{/sec/results}]]*/ '/sec/results';
+    const ackUrl = /*[[@{/sec/results/ack}]]*/ '/sec/results/ack';
+
+    const params = new URLSearchParams({
+      opponentId: /*[[${opponentId}]]*/ 0,
+      afterId: /*[[${afterId}]]*/ 0,
+      matchId: /*[[${matchId}]]*/ 0
+    });
+
+    const sse = new EventSource(eventsUrl + '?' + params.toString());
+
+    sse.addEventListener('result', function (event) {
+      const match = JSON.parse(event.data);
+
+      document.getElementById('match').textContent =
+        'Match: id ' + match.id +
+        ' user1: ' + match.user1 +
+        ' user2: ' + match.user2 +
+        ' user1Hand: ' + match.user1Hand +
+        ' user2Hand: ' + match.user2Hand;
+
+      document.getElementById('result').hidden = false;
+
+      sse.close();
+
+      // 先手の画面に表示した後、matchesのisActiveをfalseにする。
+      if (match.user1 === playerId) {
+        fetch(ackUrl + '?id=' + encodeURIComponent(match.id), {
+          method: 'POST',
+          keepalive: true
+        });
+      }
+    });
+
+    window.addEventListener('pagehide', function () {
+      sse.close();
+    });
+  </script>
 </body>
 
 </html>

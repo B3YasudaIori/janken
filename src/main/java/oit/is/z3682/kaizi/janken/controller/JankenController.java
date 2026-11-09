@@ -1,6 +1,5 @@
 package oit.is.z3682.kaizi.janken.controller;
 
-import java.lang.reflect.Array;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Random;
@@ -11,8 +10,15 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import oit.is.z3682.kaizi.janken.model.*;
+import oit.is.z3682.kaizi.janken.service.AsyncKekka;
 
 @Controller
 public class JankenController {
@@ -25,6 +31,9 @@ public class JankenController {
 
   @Autowired
   private MatchInfoMapper matchInfoMapper;
+
+  @Autowired
+  private AsyncKekka asyncKekka;
 
   /**
    * 認証済みのユーザ名と、じゃんけんの結果を画面に渡します。
@@ -72,7 +81,7 @@ public class JankenController {
   }
 
   /**
-   * 選択した手を保存し、対戦相手の手を待つ。
+   * 相手が待機中なら試合を成立させ、それ以外は自分の手を登録する。
    */
   @GetMapping("/sec/wait")
   @Transactional
@@ -84,13 +93,19 @@ public class JankenController {
     User player = userMapper.selectByName(principal.getName());
     User opponent = userMapper.selectById(id);
 
-    String playerHand = "";
-    switch (hand) {
-      case "rock" -> playerHand = "Gu";
-      case "scissors" -> playerHand = "Choki";
-      case "paper" -> playerHand = "Pa";
+    if (player == null || opponent == null || player.getId() == id) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "対戦相手が不正です。");
     }
 
+    String playerHand = switch (hand) {
+      case "rock" -> "Gu";
+      case "scissors" -> "Choki";
+      case "paper" -> "Pa";
+      default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "不正な手です。");
+    };
+
+    int afterId = asyncKekka.latestMatchId();
+    int matchId = 0;
     MatchInfo waiting = matchInfoMapper.selectWaitingMatchInfo(opponent.getId(), player.getId());
     if (waiting == null) {
       MatchInfo matchInfo = new MatchInfo();
@@ -107,10 +122,43 @@ public class JankenController {
       match.setUser2Hand(playerHand);
       match.setIsActive(true);
       matchMapper.insertMatch(match);
-      matchInfoMapper.finishMatchInfo(waiting.getId());
+      matchId = match.getId();
+
+      if (matchInfoMapper.finishMatchInfo(waiting.getId()) != 1) {
+        throw new IllegalStateException("待機情報を更新できませんでした。");
+      }
     }
     model.addAttribute("userName", principal.getName());
+    model.addAttribute("playerId", player.getId());
+    model.addAttribute("opponentId", opponent.getId());
+    model.addAttribute("opponentName", opponent.getUserName());
+    model.addAttribute("afterId", afterId);
+    model.addAttribute("matchId", matchId);
     return "wait.html";
+  }
+
+  @GetMapping(value = "/sec/results", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+  public SseEmitter results(@RequestParam("opponentId") int opponentId,
+      @RequestParam("afterId") int afterId, @RequestParam("matchId") int matchId,
+      Principal principal) {
+    User player = userMapper.selectByName(principal.getName());
+    if (player == null || userMapper.selectById(opponentId) == null
+        || player.getId() == opponentId || afterId < 0 || matchId < 0) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+    }
+    SseEmitter emitter = new SseEmitter(60000L);
+    asyncKekka.asyncShowResult(emitter, player.getId(), opponentId, afterId, matchId);
+    return emitter;
+  }
+
+  @PostMapping("/sec/results/ack")
+  public ResponseEntity<Void> acknowledge(@RequestParam("id") int id, Principal principal) {
+    User player = userMapper.selectByName(principal.getName());
+    if (player == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+    }
+    asyncKekka.acknowledge(id, player.getId());
+    return ResponseEntity.noContent().build();
   }
 
   /**
